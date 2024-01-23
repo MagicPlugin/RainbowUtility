@@ -1,0 +1,44 @@
+name: RainbowUtilty
+main: com.magicpowered.rainbowutility.RainbowUtility
+version: 24.0.1.0
+author: JLING
+api-version: 1.13
+
+commands:
+  ru:
+    description: <bk/backset/cs/weather/time/ds/reload/help>
+    usage: /<command> <bk/backset/cs/weather/time/ds/reload/help>
+    aliases:
+      - rainbowutility
+      - rainbowu
+      - rutility
+      - rtool
+    tab-completions: com.magicpowered.rainbowutility.CommandListener
+  back:
+    description: 返回之前的位置
+    usage: ""
+
+permissions:
+  rainbowutility.use.back:
+    description: 允许玩家返回
+    default: true
+  rainbowutility.use.backset:
+    description: 允许玩家设置返回相关配置
+    default: true
+  rainbowutility.use.showitem:
+    description: 允许玩家在聊天框展示物品
+    default: true
+  rainbowutility.use.weather:
+    description: 允许玩家设置个人视角的天气
+    default: op
+  rainbowutility.use.time:
+    description: 允许玩家设置个人视角的时间
+    default: op
+  rainbowutility.use.feedback:
+    description: 允许玩家进行反馈
+    default: true
+  rainbowutility.operator:
+    description: 管理员任务
+    default: op
+
+

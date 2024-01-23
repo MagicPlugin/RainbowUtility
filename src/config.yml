@@ -1,0 +1,99 @@
+#    '||    ||'     |      ..|'''.|  '||'   ..|'''.| '||''|.   ..|''||   '|| '||'  '|' '||''''|  '||''|.   '||''''|  '||''|.
+#     |||  |||     |||    .|'     '   ||  .|'     '   ||   || .|'    ||   '|. '|.  .'   ||  .     ||   ||   ||  .     ||   ||
+#     |'|..'||    |  ||   ||    ....  ||  ||          ||...|' ||      ||   ||  ||  |    ||''|     ||''|'    ||''|     ||    ||
+#     | '|' ||   .''''|.  '|.    ||   ||  '|.      .  ||      '|.     ||    ||| |||     ||        ||   |.   ||        ||    ||
+#    .|. | .||. .|.  .||.  ''|...'|  .||.  ''|....'  .||.      ''|...|'      |   |     .||.....| .||.  '|' .||.....| .||...|'
+
+# RainbowUtility 彩虹工具
+# 感谢使用 妙控动力 MagicPowered 插件。
+# 心中所想事皆成，一路前行俱坦途。
+# 七彩虹桥横九州，工匠巧手织梦游。
+
+TotalMessage:
+  prefix: "&7[&c彩虹工具&7]"
+
+# 禁用末影人对于末影螨的仇恨
+AntiEnderMan:
+  world_the_end: true
+  world/DIM1: true
+
+# 禁用受重力影响的方块更新
+AntiSandFall:
+  zy: true
+  resource: true
+
+AtHe:
+  Title:
+    title: "&6高亮消息"
+    subtitle: "&a您被 %rainbowutility_athim_sender% 提到了"
+    fadeIn: 10
+    stay: 30
+    fadeOut: 20
+  targetPlayerDeny: "玩家 %rainbowutility_athim_target% 没有开启高亮消息提示"
+  receiveMode: "成功将高亮消息提示设置为 %rainbowutility_athim_mode%"
+
+BackTo:
+  saving:
+    Title:
+      title: "&6彩虹工具"
+      subtitle: "&a再次潜行以保存传送点"
+      fadeIn: 20
+      stay: 30
+      fadeOut: 40
+    Actionbar: "&6再次潜行以保存传送点"
+    Chat: "&7[&c彩虹工具&7] 再次潜行以保存传送点"
+  saveSuccess:
+    Title:
+      title: "&6彩虹工具"
+      subtitle: "&a成功保存传送点"
+      fadeIn: 20
+      stay: 30
+      fadeOut: 30
+    Actionbar: "&a成功保存传送点"
+    Chat: "成功保存传送点"
+  infoModeSwitched: "&7成功将提示位置修改为 %rainbowutility_backto_info%"
+  successSetCommand: "&7成功将命令覆盖的状态修改为 %rainbowutility_backto_command%"
+  successSetTime: "&7成功将触发保存传送点的时间设置为 %rainbowutility_backto_time%"
+  successTeleport: "&7成功返回保存的传送点"
+  noSavePosition: "&7您没有保存过传送点"
+
+CleanScreen:
+  successClean: "&7成功清理聊天框"
+  beToDo: "&7聊天框将在 %rainbowutility_cleanscreen_time% 后清理"
+
+DropStop:
+  Title:
+    title: "&6丢弃保护"
+    subtitle: "使用 /ru ds 以设置"
+    fadeIn: 20
+    stay: 70
+    fadeOut: 20
+  enable: "&7丢弃保护已强制开启。因此, 次数和天数已归零"
+  cancelNext: "&7丢弃保护已在下一次丢弃时关闭"
+  cancelDays: "&7丢弃保护已在 %rainbowutility_dropstop_days% 天内关闭"
+  cancelNums: "&7丢弃保护将在 %rainbowutility_dropstop_nums% 次内关闭"
+  cancelKeep: "&7丢弃保护将永久被关闭"
+  protectionExpired: "&7丢弃保护在今天重新启用"
+  remainingDrops: "丢弃保护在 %rainbowutility_dropstop_remain% 次后重新启用"
+
+# 该功能在 Bukkit+Forge 服务端可能不可用，此问题无法被 MagicPowered 修复
+CustomVision:
+  Weather:
+    clear: "晴空朗日"
+    downfall: "雨雪来袭"
+    reset: "您的天气回归全局设置"
+  Time:
+    lock: "您的时间被调整至 %rainbowutility_customvision_timelock%"
+    unlock: "您的时间被锁定在 %rainbowutility_customvision_timeunlock%"
+    reset: "您的时间回归全局设置"
+
+FeedBack:
+  successSend: "&7成功向服务器留言反馈"
+
+GetHelp:
+  successSend: "&7成功向管理员发起求助"
+  opReply: "§7[§c彩虹工具§7] 管理员 %rainbowutility_gethelp_replayop% 回复了您: %rainbowutility_gethelp_replymsg%"
+
+# 保护农田不被踩踏破坏
+ProtectFarmland:
+  world: true
