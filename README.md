@@ -11,13 +11,14 @@
 - 向在线管理员获取帮助
 - 保护农田
 - 向服务器留言反馈
+- 管理世界边界
 
 ## 前置
 - 无
 
 ## 兼容性
 - Minecraft Spigot 1.13 或更高版本。
-- 在混合服务端运行时，自定义客户端天气与时间模块不可用。
+- 在 Bukkit+Forge 与 Bukkit+Fabric 混合服务端运行时，自定义客户端天气与时间模块不可用。
 
 ## 更多
 -（在编）更多内容与配置细节，参见 https://wiki.magicpowered.cn/RainbowSeries/RainbowUtility/Index
