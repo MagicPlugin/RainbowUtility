@@ -1,5 +1,6 @@
-package com.magicpowered.rainbowutility;
+package com.magicpowered.rainbowutility.Utility;
 
+import com.magicpowered.rainbowutility.FileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -9,13 +10,32 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class AntiSandFall implements Listener {
 
     private final FileManager fileManager;
+    private final Set<String> enabledWorlds = new HashSet<>();
 
     public AntiSandFall(FileManager fileManager) {
         this.fileManager = fileManager;
+        loadWorlds();
+    }
+
+    public void reloadAntiSandFall() {
+        enabledWorlds.clear();
+        loadWorlds();
+    }
+
+    private void loadWorlds() {
+        for (String key : fileManager.getConfig().getConfigurationSection("AntiSandFall.World").getKeys(false)) {
+            if (fileManager.getConfig().getBoolean("AntiSandFall.World." + key)) {
+                enabledWorlds.add(key);
+            }
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -23,7 +43,7 @@ public class AntiSandFall implements Listener {
         String world = event.getBlock().getWorld().getName();
         Material material = event.getBlock().getType();
         if (event.getEntityType() == EntityType.FALLING_BLOCK && event.getTo() == Material.AIR) {
-            if (fileManager.getConfig().getBoolean("AntiSandFall." + world, false)) {
+            if (enabledWorlds.contains(world)) {
                 if (material == Material.SAND
                         || material == Material.GRAVEL
                         || material == Material.RED_SAND

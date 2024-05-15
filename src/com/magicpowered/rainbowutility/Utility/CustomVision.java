@@ -1,6 +1,7 @@
-package com.magicpowered.rainbowutility;
+package com.magicpowered.rainbowutility.Utility;
 
 import com.comphenix.protocol.ProtocolManager;
+import com.magicpowered.rainbowutility.FileManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import java.util.UUID;
@@ -11,7 +12,6 @@ import static org.bukkit.WeatherType.DOWNFALL;
 public class CustomVision implements Listener {
 
     private FileManager fileManager;
-    private ProtocolManager protocolManager;
 
     public CustomVision (FileManager fileManager) {
         this.fileManager = fileManager;
@@ -29,19 +29,14 @@ public class CustomVision implements Listener {
         }
     }
 
-    public void setTime(Player player, long time) {
-        player.setPlayerTime(time, isTimeLockedFor(player));
-        player.sendMessage(fileManager.getMessage("CustomVision.Time", "set").replace("%rainbowutility_customvision_time%", Long.toString(time)));
-    }
-
     public void setTimeLock(Player player, long time) {
-        player.setPlayerTime(time, isTimeLockedFor(player));
+        player.setPlayerTime(time, false);
+        player.sendMessage(fileManager.getMessage("CustomVision.Time", "lock").replace("%time_lock%", Long.toString(time)));
     }
 
-    private boolean isTimeLockedFor(Player player) {
-        UUID uuid = player.getUniqueId();
-        return fileManager.getDatabase().getBoolean("CustomVision." + uuid + ".time.lock", true);
+    public void setTimeUnlock(Player player, long time) {
+        player.setPlayerTime(time, true);
+        player.sendMessage(fileManager.getMessage("CustomVision.Time", "unlock").replace("%time_unlock%", Long.toString(time)));
     }
-
 
 }

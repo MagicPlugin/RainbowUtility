@@ -1,5 +1,7 @@
-package com.magicpowered.rainbowutility;
+package com.magicpowered.rainbowutility.Utility;
 
+import com.magicpowered.rainbowutility.FileManager;
+import com.magicpowered.rainbowutility.RainbowUtility;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
@@ -37,7 +39,7 @@ public class GetHelp {
         for (Player op : plugin.getServer().getOnlinePlayers()) {
             if (op.isOp() && !shouldReject(op)) {
                 op.sendTitle("§6求助", "来自 " + sender.getName(), 10, 60, 10);
-                op.sendMessage("§7[§c彩虹工具§7] 玩家 " + sender.getName() + " 发起求助: " + message);
+                op.sendMessage("§7[§6彩虹工具§7] 玩家 " + sender.getName() + " 发起求助: " + message);
 
                 ArrayList<String> messagesForOp = inboxMap.getOrDefault(op, new ArrayList<>());  // Get existing list or create new
                 messagesForOp.add(sender.getName() + ":" + message);  // Add new message
@@ -50,14 +52,14 @@ public class GetHelp {
 
     public void replyToPlayer(Player op, Player target, String message) {
         if (replyMap.containsKey(target) && replyMap.get(target) == null) {
-            String template = fileManager.getConfig().getString("GetHelp.opReply", "§7[§c彩虹工具§7] 管理员 %rainbowutility_gethelp_replayop% 回复了您: %rainbowutility_gethelp_replymsg%");
+            String template = fileManager.getConfig().getString("GetHelp.opReply", "§7[§6彩虹工具§7] 管理员 %gethelp_replayop% 回复了您: %gethelp_replymsg%");
 
             String formattedMessage = template
-                    .replace("%rainbowutility_gethelp_replayop%", op.getName())
-                    .replace("%rainbowutility_gethelp_replymsg%", message);
+                    .replace("%gethelp_replayop%", op.getName())
+                    .replace("%gethelp_replymsg%", message);
 
             target.sendMessage(formattedMessage);
-            op.sendMessage("§7[§c彩虹工具§7] 成功向 " + target.getName() + " 回复消息: " + formattedMessage);
+            op.sendMessage("§7[§6彩虹工具§7] 成功向 " + target.getName() + " 回复消息: " + formattedMessage);
             replyMap.put(target, op);
 
             // Remove the player's message from the inboxMap after replying
@@ -65,7 +67,7 @@ public class GetHelp {
                 inboxMap.get(op).removeIf(msg -> msg.startsWith(target.getName() + ":"));
             }
         } else {
-            op.sendMessage("§7[§c彩虹工具§7] 该玩家尚未发起求助, 或他的求助已被其他管理员回应");
+            op.sendMessage("§7[§6彩虹工具§7] 该玩家尚未发起求助, 或他的求助已被其他管理员回应");
         }
     }
 
@@ -73,7 +75,7 @@ public class GetHelp {
     public ArrayList<String> viewInbox(Player op) {
         ArrayList<String> messages = new ArrayList<>();
         if (inboxMap.containsKey(op)) {
-            messages.add("§7[§c彩虹工具§7] 收件箱:");
+            messages.add("§7[§6彩虹工具§7] 收件箱:");
             for (String message : inboxMap.get(op)) {
                 String[] parts = message.split(":");  // Assuming the format is "PlayerName:Message"
                 if (parts.length >= 2) {
@@ -92,7 +94,7 @@ public class GetHelp {
         fileManager.getDatabase().set("GetHelp." + op.getUniqueId() + ".reject", value);
         fileManager.saveDatabase();
 
-        op.sendMessage("§7[§c彩虹工具§7] 成功将求助消息提示设置为: " + value);
+        op.sendMessage("§7[§6彩虹工具§7] 成功将求助消息提示设置为: " + value);
     }
 
     public void sendFeedback(Player player, String message) {

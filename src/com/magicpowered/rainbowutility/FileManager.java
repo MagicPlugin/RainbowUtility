@@ -130,11 +130,9 @@ public class FileManager {
         }
     }
 
-    public String getMessage(String mainKey, String subkey) {
-        String rawPrefix = getConfig().getString("TotalMessage.prefix", "§7[§c彩虹工具§7]");
-        String rawMessage = getConfig().getString(mainKey + "." + subkey, "对于 " + mainKey + "." + subkey + " 的消息未设置");
-        String message = (rawPrefix + " " + rawMessage).replace("&", "§");
-        return message;
+    public String getMessage(String mainKey, String subKey) {
+        String rawMessage = getConfig().getString(mainKey + "." + subKey, "§7[§6彩虹工具§7] &6警告, 对于 " + mainKey + "." + subKey + " 的消息未设置");
+        return rawMessage.replace("&", "§");
     }
 
     public boolean isFeatureEnabled(String featureName) {

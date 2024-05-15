@@ -1,6 +1,11 @@
-package com.magicpowered.rainbowutility;
+package com.magicpowered.rainbowutility.Utility;
 
+import com.magicpowered.rainbowutility.FileManager;
+import com.magicpowered.rainbowutility.Storage.Message;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,9 +19,28 @@ import java.util.concurrent.TimeUnit;
 public class DropStop implements Listener {
 
     private final FileManager fileManager;
+    private Message message;
 
     public DropStop(FileManager fileManager) {
         this.fileManager = fileManager;
+        loadMessageConfig();
+    }
+
+    public void reloadDropStop() {
+        loadMessageConfig();
+    }
+
+    private void loadMessageConfig() {
+        FileConfiguration cfg = fileManager.getConfig();
+        message = new Message(
+                cfg.getString("DropStop.Message.chat"),
+                cfg.getString("DropStop.Message.actionBar"),
+                cfg.getString("DropStop.Message.Title.title"),
+                cfg.getString("DropStop.Message.Title.subTitle"),
+                cfg.getInt("DropStop.Message.Title.Settings.fadeIn"),
+                cfg.getInt("DropStop.Message.Title.Settings.stay"),
+                cfg.getInt("DropStop.Message.Title.Settings.fadeOut")
+        );
     }
 
     public static boolean isDayAllowanceExpired(UUID uuid) {
@@ -77,8 +101,6 @@ public class DropStop implements Listener {
         fileManager.saveDatabase();
     }
 
-
-
     private static Map<UUID, Integer> allowances = new HashMap<>();
     private static Map<UUID, Long> dayAllowances = new HashMap<>();
     private static Set<UUID> permanentAllowances = new HashSet<>();
@@ -121,15 +143,15 @@ public class DropStop implements Listener {
             switch(count) {
                 case 3:
                     event.getPlayer().sendMessage(fileManager.getMessage("DropStop","remainingDrops")
-                            .replace("%rainbowutility_dropstop_remain%", Integer.toString(3)));
+                            .replace("%dropstop_remain%", Integer.toString(3)));
                     break;
                 case 2:
                     event.getPlayer().sendMessage(fileManager.getMessage("DropStop","remainingDrops")
-                            .replace("%rainbowutility_dropstop_remain%", Integer.toString(2)));
+                            .replace("%dropstop_remain%", Integer.toString(2)));
                     break;
                 case 1:
                     event.getPlayer().sendMessage(fileManager.getMessage("DropStop","remainingDrops")
-                            .replace("%rainbowutility_dropstop_remain%", Integer.toString(1)));
+                            .replace("%dropstop_remain%", Integer.toString(1)));
                     break;
             }
 
@@ -142,11 +164,27 @@ public class DropStop implements Listener {
         }
 
         event.setCancelled(true);
-        event.getPlayer().sendTitle(fileManager.getConfig().getString("DropStop.Title.title", "&6丢弃保护").replace("&", "§"),
-                                    fileManager.getConfig().getString("DropStop.Title.subtitle", "&a使用 /ru ds 设置").replace("&", "§"),
-                                    fileManager.getConfig().getInt("DropStop.Title.fadeIn", 10),
-                                    fileManager.getConfig().getInt("DropStop.Title.stay", 30),
-                                    fileManager.getConfig().getInt("DropStop.Title.fadeOut", 10));
+        sendMessage(event.getPlayer());
+    }
+
+    private void sendMessage(Player player) {
+        String useMode = fileManager.getDatabase().getString("DropStop." + player.getUniqueId() + ".message", "chat");
+        switch (useMode) {
+            case "chat":
+                player.sendMessage(message.chat.replace("&", "§"));
+                break;
+            case "actionbar":
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message.actionBar.replace("&", "§")));
+                break;
+            case "title":
+                player.sendTitle(
+                        message.title.replace("&", "§"),
+                        message.subTitle.replace("&", "§"),
+                        message.fadeIn,
+                        message.stay,
+                        message.fadeOut
+                );
+        }
     }
 
 

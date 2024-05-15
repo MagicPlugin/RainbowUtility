@@ -9,91 +9,175 @@
 # 心中所想事皆成，一路前行俱坦途。
 # 七彩虹桥横九州，工匠巧手织梦游。
 
-TotalMessage:
-  prefix: "&7[&c彩虹工具&7]"
+# WorldBorder 模块只提供命令，所以不提供独立开关
 
 # 禁用末影人对于末影螨的仇恨
 AntiEnderMan:
-  world_the_end: true
-  world/DIM1: true
+  # 模块开关
+  enable: true
+  # 世界列表
+  World:
+    world_the_end: true
+    world/DIM1: true
 
 # 禁用受重力影响的方块更新
 AntiSandFall:
-  zy: true
-  resource: true
+  # 模块开关
+  enable: true
+  # 世界列表
+  World:
+    zy: true
+    resource: true
 
-AtHe:
-  Title:
-    title: "&6高亮消息"
-    subtitle: "&a您被 %rainbowutility_athim_sender% 提到了"
-    fadeIn: 10
-    stay: 30
-    fadeOut: 20
-  targetPlayerDeny: "玩家 %rainbowutility_athim_target% 没有开启高亮消息提示"
-  receiveMode: "成功将高亮消息提示设置为 %rainbowutility_athim_mode%"
+# 高亮提醒 (@)
+# 有关权限
+#  rainbowutility.use.athim
+AtHim:
+  # 模块开关
+  enable: true
+  Message:
+    chat: "您被 %athim_sender% 提到了"
+    actionBar: "您被 %athim_sender% 提到了"
+    Title:
+      title: "&6高亮消息"
+      subTitle: "&a您被 %athim_sender% 提到了"
+      Settings:
+        fadeIn: 10
+        stay: 30
+        fadeOut: 20
+  # 目标玩家不接受高亮消息提示
+  targetPlayerDeny: "玩家 %athim_target% 没有开启高亮消息提示"
+  # 修改高亮消息提示接受模式
+  receiveMode: "成功将高亮消息提示设置为 %athim_mode%"
+  # 修改使用的消息类型
+  messageModeSwitched: "&7成功将使用的消息类型修改为 %athim_message%"
 
+# 快捷传送点
+# 有关权限
+#  rainbowutility.use.back
+#  rainbowutility.use.backset
 BackTo:
-  saving:
+  # 模块开关
+  enable: true
+  # 正在保存传送点时
+  Saving:
+    chat: "&7[&c彩虹工具&7] 再次潜行以保存传送点"
+    actionBar: "&6再次潜行以保存传送点"
     Title:
       title: "&6彩虹工具"
-      subtitle: "&a再次潜行以保存传送点"
-      fadeIn: 20
-      stay: 30
-      fadeOut: 40
-    Actionbar: "&6再次潜行以保存传送点"
-    Chat: "&7[&c彩虹工具&7] 再次潜行以保存传送点"
-  saveSuccess:
+      subTitle: "&a再次潜行以保存传送点"
+      Settings:
+        fadeIn: 20
+        stay: 30
+        fadeOut: 40
+  # 传送点保存成功
+  Saved:
+    chat: "成功保存传送点"
+    actionBar: "&a成功保存传送点"
     Title:
       title: "&6彩虹工具"
-      subtitle: "&a成功保存传送点"
-      fadeIn: 20
-      stay: 30
-      fadeOut: 30
-    Actionbar: "&a成功保存传送点"
-    Chat: "成功保存传送点"
-  infoModeSwitched: "&7成功将提示位置修改为 %rainbowutility_backto_info%"
-  successSetCommand: "&7成功将命令覆盖的状态修改为 %rainbowutility_backto_command%"
-  successSetTime: "&7成功将触发保存传送点的时间设置为 %rainbowutility_backto_time%"
+      subTitle: "&a成功保存传送点"
+      Settings:
+        fadeIn: 20
+        stay: 30
+        fadeOut: 30
+  # 修改使用的消息类型
+  messageModeSwitched: "&7成功将使用的消息类型修改为 %backto_message"
+  # 修改命令覆盖状态，即是否响应 /back
+  successSetCommand: "&7成功将命令覆盖的状态修改为 %backto_command%"
+  # 修改触发此功能的多次潜行间的时间
+  successSetTime: "&7成功将触发保存传送点的时间设置为 %backto_time%"
+  # 成功返回
   successTeleport: "&7成功返回保存的传送点"
+  # 尝试返回但没有保存的传送点
   noSavePosition: "&7您没有保存过传送点"
 
+# 清理屏幕
+# 有关权限
+#  rainbowutility.use.cleanscreen
 CleanScreen:
+  # 模块开关
+  enable: true
+  # 成功信息
   successClean: "&7成功清理聊天框"
-  beToDo: "&7聊天框将在 %rainbowutility_cleanscreen_time% 后清理"
+  # 延迟清理
+  beToDo: "&7聊天框将在 %cleanscreen_time% 后清理"
 
+# 丢弃保护
+# 有关权限
+#  rainbowutility.use.dropstop
 DropStop:
-  Title:
-    title: "&6丢弃保护"
-    subtitle: "使用 /ru ds 以设置"
-    fadeIn: 20
-    stay: 70
-    fadeOut: 20
-  enable: "&7丢弃保护已强制开启。因此, 次数和天数已归零"
+  # 模块开关
+  enable: true
+  Message:
+    chat: "丢弃保护"
+    actionBar: "丢弃保护"
+    Title:
+      title: "&6丢弃保护"
+      subTitle: "使用 /ru ds 以设置"
+      Settings:
+        fadeIn: 20
+        stay: 70
+        fadeOut: 20
+  # 修改使用的消息类型
+  messageModeSwitched: "&7成功将使用的消息类型修改为 %dropstop_message%"
+  # 强制开启丢弃保护
+  enabled: "&7丢弃保护已强制开启。因此, 次数和天数已归零"
   cancelNext: "&7丢弃保护已在下一次丢弃时关闭"
-  cancelDays: "&7丢弃保护已在 %rainbowutility_dropstop_days% 天内关闭"
-  cancelNums: "&7丢弃保护将在 %rainbowutility_dropstop_nums% 次内关闭"
+  cancelDays: "&7丢弃保护已在 %dropstop_days% 天内关闭"
+  cancelNums: "&7丢弃保护将在 %dropstop_nums% 次内关闭"
   cancelKeep: "&7丢弃保护将永久被关闭"
+  # 玩家上线时，如果丢弃保护关闭时间已过
   protectionExpired: "&7丢弃保护在今天重新启用"
-  remainingDrops: "丢弃保护在 %rainbowutility_dropstop_remain% 次后重新启用"
+  # 丢弃保护允许次数即将耗尽
+  remainingDrops: "丢弃保护在 %dropstop_remain% 次后重新启用"
 
-# 该功能在 Bukkit+Forge 服务端可能不可用，此问题无法被 MagicPowered 修复
+# 自定义视觉
+# 该功能在 Bukkit+Forge 与 Bukkit+Fabric 混合服务端可能不可用，此问题无法被 MagicPowered 修复
+# 有关权限
+#  rainbowutility.use.weather
+#  rainbowutility.use.time
 CustomVision:
+  # 模块开关
+  enable: true
+  # 天气
   Weather:
+    # 晴天
     clear: "晴空朗日"
+    # 雨雪
     downfall: "雨雪来袭"
+    # 重置
     reset: "您的天气回归全局设置"
+  # 时间
   Time:
-    lock: "您的时间被调整至 %rainbowutility_customvision_timelock%"
-    unlock: "您的时间被锁定在 %rainbowutility_customvision_timeunlock%"
+    # 调整并锁定
+    lock: "您的时间被锁定至 %customvision_time_lock%"
+    # 调整但不锁定
+    unlock: "您的时间被调整至 %customvision_time_unlock%"
+    # 重置
     reset: "您的时间回归全局设置"
 
+# 反馈
+# 有关权限
+#  rainbowutility.use.feedback
 FeedBack:
+  # 模块开关
+  enable: true
   successSend: "&7成功向服务器留言反馈"
 
+# 向管理员请求帮助
+# 有关权限
+#  rainbowutility.use.callop
 GetHelp:
+  # 模块开关
+  enable: true
   successSend: "&7成功向管理员发起求助"
-  opReply: "§7[§c彩虹工具§7] 管理员 %rainbowutility_gethelp_replayop% 回复了您: %rainbowutility_gethelp_replymsg%"
+  opReply: "§7[§6彩虹工具§7] 管理员 %gethelp_replayop% 回复了您: %gethelp_replymsg%"
 
 # 保护农田不被踩踏破坏
 ProtectFarmland:
-  world: true
+  # 模块开关
+  enable: true
+  # 世界列表
+  World:
+    world: false

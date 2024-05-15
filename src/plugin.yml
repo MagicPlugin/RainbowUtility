@@ -1,13 +1,13 @@
 name: RainbowUtilty
 main: com.magicpowered.rainbowutility.RainbowUtility
-version: 24.0.1.0
+version: 24.0.2.1
 author: JLING
 api-version: 1.13
 
 commands:
   ru:
-    description: <bk/backset/cs/weather/time/ds/reload/help>
-    usage: /<command> <bk/backset/cs/weather/time/ds/reload/help>
+    description: <bk/cs/vs/ds/wb/admin/op/reload/help>
+    usage: /<command> <bk/cs/vs/ds/wb/admin/op/reload/help>
     aliases:
       - rainbowutility
       - rainbowu
@@ -19,14 +19,14 @@ commands:
     usage: ""
 
 permissions:
+  rainbowutility.use.cleanscreen:
+    description: 允许玩家使用清理屏幕
+    default: true
   rainbowutility.use.back:
     description: 允许玩家返回
     default: true
   rainbowutility.use.backset:
     description: 允许玩家设置返回相关配置
-    default: true
-  rainbowutility.use.showitem:
-    description: 允许玩家在聊天框展示物品
     default: true
   rainbowutility.use.weather:
     description: 允许玩家设置个人视角的天气
@@ -34,11 +34,19 @@ permissions:
   rainbowutility.use.time:
     description: 允许玩家设置个人视角的时间
     default: op
+  rainbowutility.use.dropstop:
+    description: 允许玩家设置丢弃保护
+    default: true
   rainbowutility.use.feedback:
     description: 允许玩家进行反馈
     default: true
+  rainbowutility.use.callop:
+    description: 允许玩家向管理员请求帮助
+    default: true
+  rainbowutility.worldborder:
+    description: 世界边界管理
+    default: op
   rainbowutility.operator:
     description: 管理员任务
     default: op
-
 
