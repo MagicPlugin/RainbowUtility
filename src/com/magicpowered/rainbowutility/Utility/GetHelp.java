@@ -52,7 +52,7 @@ public class GetHelp {
 
     public void replyToPlayer(Player op, Player target, String message) {
         if (replyMap.containsKey(target) && replyMap.get(target) == null) {
-            String template = fileManager.getConfig().getString("GetHelp.opReply", "§7[§6彩虹工具§7] 管理员 %gethelp_replayop% 回复了您: %gethelp_replymsg%");
+            String template = fileManager.getMessage("GetHelp.Message", "opReply");
 
             String formattedMessage = template
                     .replace("%gethelp_replayop%", op.getName())
@@ -62,7 +62,6 @@ public class GetHelp {
             op.sendMessage("§7[§6彩虹工具§7] 成功向 " + target.getName() + " 回复消息: " + formattedMessage);
             replyMap.put(target, op);
 
-            // Remove the player's message from the inboxMap after replying
             if(inboxMap.containsKey(op)) {
                 inboxMap.get(op).removeIf(msg -> msg.startsWith(target.getName() + ":"));
             }
@@ -106,7 +105,7 @@ public class GetHelp {
         // 存储消息
         fileManager.getFeedback().set(key, message);
         fileManager.saveFeedback();
-        player.sendMessage(fileManager.getMessage("FeedBack", "successSend"));
+        player.sendMessage(fileManager.getMessage("FeedBack.Message", "successSend"));
     }
 
 

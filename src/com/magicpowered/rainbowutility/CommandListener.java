@@ -1,24 +1,26 @@
 package com.magicpowered.rainbowutility;
 
+import com.magicpowered.rainbowutility.CommandHandler.WorldBorderHandler;
 import com.magicpowered.rainbowutility.Utility.*;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.WorldBorder;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.map.MapCanvas;
+import org.bukkit.map.MapRenderer;
+import org.bukkit.map.MapView;
 import org.bukkit.util.StringUtil;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isNumeric;
 
 public class CommandListener implements CommandExecutor, TabCompleter {
@@ -30,20 +32,28 @@ public class CommandListener implements CommandExecutor, TabCompleter {
     private CustomVision customVision;
     private DropStop dropStop;
     private GetHelp getHelp;
+    private ColorName colorName;
+    private final WorldBorderHandler worldBorder;
 
     public CommandListener(RainbowUtility plugin, FileManager fileManager) {
         this.plugin = plugin;
         this.fileManager = fileManager;
 
         if (plugin.isCustomVisionEnabled()) {
-            customVision = new CustomVision(fileManager);
+            customVision = plugin.getCustomVision();
         }
         if (plugin.isDropStopEnabled()) {
-            dropStop = new DropStop(fileManager);
+            dropStop = plugin.getDropStop();
         }
         if (plugin.isGetHelpEnabled()) {
-            getHelp = new GetHelp(plugin, fileManager);
+            getHelp = plugin.getGetHelp();
         }
+        if (plugin.isColorNameEnable()) {
+            colorName = plugin.getColorName();
+        }
+
+        worldBorder = new WorldBorderHandler();
+
     }
 
     @Override
@@ -76,7 +86,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
         }
 
         switch (args[0].toLowerCase()) {
-            case "op":
+            case "co":
                 if (!sender.hasPermission("rainbowutility.use.callop")) {
                     sender.sendMessage("§7[§6彩虹工具§7] §c您没有执行此命令的权限");
                     return true;
@@ -89,12 +99,12 @@ public class CommandListener implements CommandExecutor, TabCompleter {
 
                 if (args.length < 2) {
                     sender.sendMessage("§7[§6彩虹工具§7] §c参数过多或缺少必要参数");
-                    sender.sendMessage("§7  |用法- §6/ru op 请问如何前往生存世界");
+                    sender.sendMessage("§7  |用法- §6/ru co 请问如何前往生存世界");
                     return true;
                 }
 
                 getHelp.sendOpHelp(player, Arrays.stream(args).skip(1).collect(Collectors.joining(" ")));
-                sender.sendMessage(fileManager.getMessage("GetHelp", "successSend"));
+                sender.sendMessage(fileManager.getMessage("GetHelp.Message", "successSend"));
                 Bukkit.getServer().getLogger().info(Arrays.stream(args).skip(1).collect(Collectors.joining(" ")));
                 return true;
 
@@ -194,15 +204,62 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 }
                 return true;
 
-            case "bk":
+            case "cn":
+                if (!plugin.isColorNameEnable()) {
+                    Bukkit.getServer().getLogger().info("§7[§6彩虹工具§7] §c错误, 此模块未被启用");
+                    return true;
+                }
+
                 if (args.length >= 2 && args[1].equalsIgnoreCase("set")) {
                     if (player == null) {
                         Bukkit.getServer().getLogger().info("[彩虹工具] 此命令必须由一个玩家执行");
                         return true;
                     }
 
-                    if (!plugin.isBackToEnabled()) {
-                        Bukkit.getServer().getLogger().info("§7[§6彩虹工具§7] §c错误, 此模块未被启用");
+                    if (!sender.hasPermission("rainbowutility.use.colorname.name")) {
+                        sender.sendMessage("§7[§6彩虹工具§7] §c您没有执行此命令的权限");
+                        return true;
+                    }
+
+                    if (args.length != 4) {
+                        sender.sendMessage("§7[§6彩虹工具§7] §c参数过多或缺少必要参数");
+                        sender.sendMessage("§7  |用法- §6/ru cn set name <name> ");
+                        return true;
+                    }
+
+                    String changeName = args[3];
+
+                    colorName.setColorNameByCard(player, changeName);
+
+                    return true;
+                } else {
+                    if (!sender.hasPermission("rainbowutility.use.colorname.give")) {
+                        sender.sendMessage("§7[§6彩虹工具§7] §c您没有执行此命令的权限");
+                        return true;
+                    }
+
+                    if (args.length != 4) {
+                        sender.sendMessage("§7[§6彩虹工具§7] §c参数过多或缺少必要参数");
+                        sender.sendMessage("§7  |用法- §6/ru cn give MIMIGZK 1");
+                        return true;
+                    }
+
+                    int number = Integer.parseInt(args[4]);
+
+                    colorName.givePlayerColorNameCard(player, number);
+
+                    return true;
+                }
+
+            case "bk":
+                if (!plugin.isBackToEnabled()) {
+                    Bukkit.getServer().getLogger().info("§7[§6彩虹工具§7] §c错误, 此模块未被启用");
+                    return true;
+                }
+
+                if (args.length >= 2 && args[1].equalsIgnoreCase("set")) {
+                    if (player == null) {
+                        Bukkit.getServer().getLogger().info("[彩虹工具] 此命令必须由一个玩家执行");
                         return true;
                     }
 
@@ -229,7 +286,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                                 }
                                 fileManager.getDatabase().set("BackTo." + player.getUniqueId() + ".time", delayTime);
                                 fileManager.saveDatabase();
-                                player.sendMessage(fileManager.getMessage("BackTo", "successSetTime").replace("%rainbowutility_backto_time%", Integer.toString(delayTime)));
+                                player.sendMessage(fileManager.getMessage("BackTo", "successSetTime").replace("%backto_time%", Integer.toString(delayTime)));
                             } catch (NumberFormatException e) {
                                 sender.sendMessage("§7[§c彩虹头颅§7] §c错误, 参数 " + args[3] + " 不是数字");
                             }
@@ -283,13 +340,13 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
-                if(args.length >= 2) {
-                    switch(args[1].toLowerCase()) {
+                if (args.length >= 2) {
+                    switch (args[1].toLowerCase()) {
                         case "once":
-                            if(args.length == 3 && isNumeric(args[2])) {
+                            if (args.length == 3 && isNumeric(args[2])) {
                                 DropStop.setAllowance(player.getUniqueId(), Integer.parseInt(args[2]));
                                 String message = fileManager.getMessage("DropStop", "cancelNums")
-                                        .replace("%rainbowutility_dropstop_nums%", args[2]);
+                                        .replace("%dropstop_nums%", args[2]);
                                 player.sendMessage(message);
                             } else {
                                 DropStop.setAllowance(player.getUniqueId(), 1);
@@ -297,19 +354,31 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                             }
                             break;
                         case "day":
-                            if(args.length == 3 && isNumeric(args[2])) {
-                                DropStop.setDayAllowance(player.getUniqueId(), Integer.parseInt(args[2]));
+                            if (args.length == 3 && isNumeric(args[2])) {
+                                dropStop.setDayAllowance(player.getUniqueId(), Integer.parseInt(args[2]));
                                 String message = fileManager.getMessage("DropStop", "cancelDays")
-                                        .replace("%rainbowutility_dropstop_days%", args[2]);
+                                        .replace("%dropstop_days%", args[2]);
                                 player.sendMessage(message);
                             } else {
-                                DropStop.setDayAllowance(player.getUniqueId(), 1);
+                                dropStop.setDayAllowance(player.getUniqueId(), 1);
                                 player.sendMessage(fileManager.getMessage("DropStop", "cancelDays")
-                                        .replace("%rainbowutility_dropstop_days%", "1"));
+                                        .replace("%dropstop_days%", "1"));
+                            }
+                            break;
+                        case "min":
+                            if (args.length == 3 && isNumeric(args[2])) {
+                                dropStop.setMinAllowance(player.getUniqueId(), Integer.parseInt(args[2]));
+                                String message = fileManager.getMessage("DropStop", "cancelMins")
+                                        .replace("%dropstop_mins%", args[2]);
+                                player.sendMessage(message);
+                            } else {
+                                dropStop.setMinAllowance(player.getUniqueId(), 1);
+                                player.sendMessage(fileManager.getMessage("DropStop", "cancelMins")
+                                        .replace("%dropstop_mins%", "1"));
                             }
                             break;
                         case "keep":
-                            DropStop.setPermanentAllowance(player.getUniqueId());
+                            dropStop.setPermanentAllowance(player.getUniqueId());
                             player.sendMessage(fileManager.getMessage("DropStop", "cancelKeep"));
                             break;
                         case "true":
@@ -331,6 +400,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                             sender.sendMessage("§7  |用法- §6/ru ds true");
                             sender.sendMessage("§7  |用法- §6/ru ds keep");
                             sender.sendMessage("§7  |用法- §6/ru ds once 5");
+                            sender.sendMessage("§7  |用法- §6/ru ds min 5");
                             sender.sendMessage("§7  |用法- §6/ru ds day 7");
                             sender.sendMessage("§7  |用法- §6/ru ds message <chat/actionbar/title>");
                     }
@@ -444,7 +514,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 }
                 return true;
 
-            case "wb" :
+            case "wb":
                 if (!sender.hasPermission("rainbowutility.worldborder")) {
                     sender.sendMessage("§7[§6彩虹工具§7] §c您没有执行此命令的权限");
                     return true;
@@ -452,11 +522,11 @@ public class CommandListener implements CommandExecutor, TabCompleter {
 
                 switch (args[1].toLowerCase()) {
                     case "normal":
-                        return handleWbNormalCommand(sender, args);
+                        return worldBorder.handleWbNormalCommand(sender, args);
                     case "damage":
-                        return handleWbDamageCommand(sender, args);
+                        return worldBorder.handleWbDamageCommand(sender, args);
                     case "warn":
-                        return handleWbWarnCommand(sender, args);
+                        return worldBorder.handleWbWarnCommand(sender, args);
                     default:
                         sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[1] + " 不是有效的子命令参数: <normal/damage/warn>");
                         return false;
@@ -548,9 +618,10 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                             sender.sendMessage("§7[§6彩虹工具§7] 工具包 帮助:");
                             sender.sendMessage("§7必要参数: <?>, 可选必要参数: <?/?>, 非必要参数: [?], 可选非必要参数: [?/?]");
                             sender.sendMessage("§7  |- §6/ru cs [value] §7- 立即或延迟后清空聊天框");
-                            sender.sendMessage("§7  |- §6/ru op <message> §true/false7- 向在线的管理员发出帮助请求");
+                            sender.sendMessage("§7  |- §6/ru co <message> §true/false7- 向在线的管理员发出帮助请求");
                             sender.sendMessage("§7  |- §6/ru at enable <true/false> §7- 开启 或 关闭 接受高亮提示消息");
                             sender.sendMessage("§7  |- §6/ru at message <chat/actionbar/title> §7- 设置高亮提示消息模式");
+                            sender.sendMessage("§7  |- §6/ru cn setname <name> §7- 使用彩色命名卡命名主手物品名字");
                             sender.sendMessage("§7  |- §6/ru fb <message> §7- 向服务器留言反馈");
                             break;
                         case "backto":
@@ -600,9 +671,9 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                             }
                             sender.sendMessage("§7[§6彩虹工具§7] 管理员任务 帮助:");
                             sender.sendMessage("§7必要参数: <?>, 可选必要参数: <?/?>, 非必要参数: [?], 可选非必要参数: [?/?]");
-                            sender.sendMessage("§7  |- §6/ru reply <playerName> <message> §7- 回复指定玩家的求助");
-                            sender.sendMessage("§7  |- §6/ru reject <true/false> §7- 开启 或 关闭玩家求助提示");
-                            sender.sendMessage("§7  |- §6/ru inbox §7- 查看玩家求助收件箱");
+                            sender.sendMessage("§7  |- §6/ru op reply <playerName> <message> §7- 回复指定玩家的求助");
+                            sender.sendMessage("§7  |- §6/ru op reject <true/false> §7- 开启 或 关闭玩家求助提示");
+                            sender.sendMessage("§7  |- §6/ru op inbox §7- 查看玩家求助收件箱");
                             break;
                         default:
                             sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[1].toLowerCase() + " 不是有效的子命令参数: <tools/bakto/dropstop/vision/operator>");
@@ -614,244 +685,6 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§7[§6彩虹工具§7] 这是一个不存在的命令或拼写错误: " + args[0]);
                 sender.sendMessage("§7  |- 输入 §c/ru help §7查看帮助");
                 break;
-        }
-
-        return true;
-    }
-
-    /*
-       ################################################################################################################
-
-                                                                世界边界处理
-
-       ################################################################################################################
-     */
-
-    private WorldBorder getWorldBorder(CommandSender sender, String worldName) {
-        World world = Bukkit.getWorld(worldName);
-
-        if (world == null) {
-            sender.sendMessage("§7[§6彩虹工具§7] §c错误, 指定世界 " + worldName + " 不存在");
-            return null;
-        }
-
-        return world.getWorldBorder();
-    }
-
-    private boolean handleWbWarnCommand(CommandSender sender, String[] args) {
-        if (args.length < 3) {
-            sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <get|set|time>");
-            return true;
-        }
-
-        if (args.length < 4) {
-            sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <world>");
-            return true;
-        }
-
-        String worldName = args[3];
-        WorldBorder wb = getWorldBorder(sender, worldName);
-        if (wb == null) return true;
-
-        switch (args[2].toLowerCase()) {
-            case "get":
-                sender.sendMessage("§7[§6彩虹工具§7] §a世界 " + worldName + " 接近边界得到警告的方块数为 " + wb.getWarningDistance());
-                break;
-            case "set":
-                if (args.length < 5) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <num>");
-                    return true;
-                }
-                int warnSetNum;
-                try {
-                    warnSetNum = Integer.parseInt(args[4]);
-                } catch (NumberFormatException e) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[4] + "不是数字");
-                    return true;
-                }
-                sender.sendMessage("§7[§6彩虹工具§7] §a设置世界 " + worldName + " 接近边界得到警告的方块数为 " + warnSetNum);
-                wb.setWarningDistance(warnSetNum);
-                break;
-            case "time":
-                if (args.length < 5) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <num>");
-                    return true;
-                }
-                int warnTimeNum;
-                try {
-                    warnTimeNum = Integer.parseInt(args[4]);
-                } catch (NumberFormatException e) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[4] + "不是数字");
-                    return true;
-                }
-                sender.sendMessage("§7[§6彩虹工具§7] §a设置世界 " + worldName + " 接近边界得到的警告时间为 " + warnTimeNum);
-                wb.setWarningTime(warnTimeNum);
-                break;
-            default:
-                sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[2].toLowerCase() + " 不是有效的子命令参数: <get/set/time>");
-                return true;
-        }
-
-        return true;
-    }
-
-    private boolean handleWbNormalCommand(CommandSender sender, String[] args) {
-        if (args.length < 3) {
-            sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <get|set|time>");
-            return true;
-        }
-
-        if (args.length < 4) {
-            sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <world>");
-            return true;
-        }
-
-        String worldName = args[3];
-        WorldBorder wb = getWorldBorder(sender, worldName);
-        if (wb == null) return true;
-
-        String world = args[3];
-        switch (args[2].toLowerCase()) {
-            case "info":
-                sender.sendMessage("§7[§6彩虹工具§7] §a世界 " + world + " 的边界信息为: ");
-                sender.sendMessage("§7  |- §f中心: " + wb.getCenter());
-                sender.sendMessage("§7  |- §f长度: " + wb.getSize());
-                break;
-            case "set":
-                if (args.length < 5) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <num>");
-                    return true;
-                }
-                int setNum;
-                try {
-                    setNum = Integer.parseInt(args[4]);
-                } catch (NumberFormatException e) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[4] + "不是数字");
-                    return true;
-                }
-                sender.sendMessage("§7[§6彩虹工具§7] §a设置世界 " + world + " 的边界为 " + setNum);
-                break;
-            case "add":
-                if (args.length < 5) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <num>");
-                    return true;
-                }
-                double addNum, newSizeAdd;
-                try {
-                    addNum = Double.parseDouble(args[4]);
-                    newSizeAdd = wb.getSize() + addNum;
-                } catch (NumberFormatException e) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[4] + "不是数字");
-                    return true;
-                }
-                sender.sendMessage("§7[§6彩虹工具§7] §a将世界 " + worldName + " 的边界增加 " + addNum + " ( " + wb.getSize() + " -> " + newSizeAdd + " )");
-                wb.setSize(newSizeAdd);
-                break;
-            case "reduce":
-                if (args.length < 5) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <num>");
-                    return true;
-                }
-                double reduceNum, newSizeReduce;
-                try {
-                    reduceNum = Double.parseDouble(args[4]);
-                    newSizeReduce = wb.getSize() - reduceNum;
-                } catch (NumberFormatException e) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[4] + "不是数字");
-                    return true;
-                }
-                if (newSizeReduce < 0) newSizeReduce = 0;
-                sender.sendMessage("§7[§6彩虹工具§7] §a将世界 " + worldName + " 的边界减少 " + reduceNum + " （ " + wb.getSize() + " —> " + newSizeReduce + " )");
-                wb.setSize(newSizeReduce);
-                break;
-            case "center":
-                if (args.length < 5) {
-                    if (!(sender instanceof Player)) {
-                        sender.sendMessage("[彩虹工具] 此命令必须由一个玩家执行");
-                        sender.sendMessage("[彩虹工具] 如果您希望从控制台设置，请指定坐标位置 x, z");
-                        return true;
-                    }
-                    sender.sendMessage("§7[§6彩虹工具§7] §a将世界 " + worldName + " 的边界中心设置为当前位置");
-                    wb.setCenter(((Player) sender).getLocation());
-                    return true;
-                } else if (args.length == 6) {
-                    int x, z;
-                    try {
-                        x = Integer.parseInt(args[4]);
-                        z = Integer.parseInt(args[5]);
-                    } catch (NumberFormatException e) {
-                        sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[4] + " " + args[5] + " 中有一位不是数字");
-                        return true;
-                    }
-                    sender.sendMessage("§7[§6彩虹工具§7] §a将世界 " + worldName + " 的边界中心设置为 (" + x + ", " + z + ")");
-                    return true;
-                } else {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c参数过多或缺少必要参数");
-                }
-                break;
-            case "reset":
-                sender.sendMessage("§7[§6彩虹工具§7] §a世界 " + worldName + " 边界恢复默认值");
-                break;
-            default:
-                sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[2].toLowerCase() + " 不是有效的子命令参数: <info/set/add/reduce/center/reset>");
-                return true;
-        }
-
-        return true;
-    }
-
-    private boolean handleWbDamageCommand(CommandSender sender, String[] args) {
-        if (args.length < 3) {
-            sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <get|set|time>");
-            return true;
-        }
-
-        if (args.length < 4) {
-            sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <world>");
-            return true;
-        }
-
-        String worldName = args[3];
-        WorldBorder wb = getWorldBorder(sender, worldName);
-        if (wb == null) return true;
-
-        switch (args[2].toLowerCase()) {
-            case "get":
-                sender.sendMessage("§7[§6彩虹工具§7] §a世界 " + worldName + " 越过边界后受到的伤害值为 " + wb.getDamageAmount());
-                break;
-            case "set":
-                if (args.length < 5) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c缺少必要参数: <num>");
-                    return false;
-                }
-                int damageSetNum;
-                try {
-                    damageSetNum = Integer.parseInt(args[4]);
-                } catch (NumberFormatException e) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[4] + "不是数字");
-                    return true;
-                }
-                sender.sendMessage("§7[§6彩虹工具§7] §a设置世界 " + worldName + " 越过边界后受到的伤害值为 " + damageSetNum);
-                wb.setDamageAmount(damageSetNum);
-                break;
-            case "buffer":
-                if (args.length < 5) {
-                    sender.sendMessage("§7[§6彩o n g虹工具§7] §c缺少必要参数: <num>");
-                    return false;
-                }
-                int bufferNum;
-                try {
-                    bufferNum = Integer.parseInt(args[4]);
-                } catch (NumberFormatException e) {
-                    sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[4] + "不是数字");
-                    return true;
-                }
-                sender.sendMessage("§7[§6彩虹工具§7] §a设置世界 " + worldName + " 越过边界后仍安全的方块数为 " + bufferNum);
-                wb.setDamageBuffer(bufferNum);
-                break;
-            default:
-                sender.sendMessage("§7[§6彩虹工具§7] §c错误, 参数 " + args[2].toLowerCase() + " 不是有效的子命令参数: <get/set/buffer>");
-                return false;
         }
 
         return true;
@@ -888,6 +721,17 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                         completions.addAll(Arrays.asList("true", "false"));
                     } else if (args.length == 3 && args[1].equalsIgnoreCase("message")){
                         completions.addAll(Arrays.asList("title", "chat", "actionbar"));
+                    }
+                    break;
+                case "cn":
+                    if (args.length == 2) {
+                        completions.addAll(Arrays.asList("setname", "give"));
+                    } else if (args.length == 3 && args[1].equalsIgnoreCase("give")) {
+                        completions.addAll(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+                    } else if (args.length == 4 && args[1].equalsIgnoreCase("give")) {
+                        completions.add("<amount>");
+                    } else if (args.length == 3 && args[1].equalsIgnoreCase("setname")) {
+                        completions.add("<string>");
                     }
                     break;
                 case "fb":
@@ -978,7 +822,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     }
                     break;
                 case "help":
-                    if(args.length == 2) completions.addAll(Arrays.asList("tools", "back", "dropstop", "vision", "operator"));
+                    if(args.length == 2) completions.addAll(Arrays.asList("tools", "back", "dropstop", "vision", "worldborder","operator"));
                     break;
             }
         }
@@ -1006,6 +850,20 @@ public class CommandListener implements CommandExecutor, TabCompleter {
             player.sendMessage(fileManager.getMessage("BackTo", "noSavePosition"));
         }
         return true;
+    }
+
+    private static class CustomMapRenderer extends MapRenderer {
+        private final BufferedImage image;
+
+        public CustomMapRenderer(BufferedImage image) {
+            this.image = image;
+        }
+
+        @Override
+        public void render(MapView view, MapCanvas canvas, Player player) {
+            // 将 BufferedImage 渲染到 MapCanvas 上
+            canvas.drawImage(0, 0, image.getScaledInstance(128, 128, Image.SCALE_SMOOTH));
+        }
     }
 
 }

@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -44,8 +45,8 @@ public class DropStop implements Listener {
     }
 
     public static boolean isDayAllowanceExpired(UUID uuid) {
-        if(dayAllowances.containsKey(uuid)) {
-            if(System.currentTimeMillis() > dayAllowances.get(uuid)) {
+        if (dayAllowances.containsKey(uuid)) {
+            if (System.currentTimeMillis() > dayAllowances.get(uuid)) {
                 return true;
             }
         }
@@ -66,6 +67,11 @@ public class DropStop implements Listener {
             dayAllowances.put(playerUUID, fileManager.getDatabase().getLong("DropStop." + playerUUID + ".dayAllowances"));
         }
 
+        // Load min allowances
+        if (fileManager.getDatabase().contains("DropStop." + playerUUID + ".minAllowances")) {
+            minAllowances.put(playerUUID, fileManager.getDatabase().getLong("DropStop." + playerUUID + ".minAllowances"));
+        }
+
         // Load permanent allowances
         if (fileManager.getDatabase().contains("DropStop." + playerUUID + ".permanentAllowances") &&
                 fileManager.getDatabase().getBoolean("DropStop." + playerUUID + ".permanentAllowances")) {
@@ -73,7 +79,7 @@ public class DropStop implements Listener {
         }
 
         // Check if day allowance is expired
-        if(isDayAllowanceExpired(playerUUID)) {
+        if (isDayAllowanceExpired(playerUUID)) {
             event.getPlayer().sendMessage(fileManager.getMessage("DropStop", "protectionExpired"));
             dayAllowances.remove(playerUUID); // 清除该玩家的日期记录，避免重复提醒
         }
@@ -93,6 +99,11 @@ public class DropStop implements Listener {
             fileManager.getDatabase().set("DropStop." + playerUUID + ".dayAllowances", dayAllowances.get(playerUUID));
         }
 
+        // Save min allowances
+        if (minAllowances.containsKey(playerUUID)) {
+            fileManager.getDatabase().set("DropStop." + playerUUID + ".minAllowances", minAllowances.get(playerUUID));
+        }
+
         // Save permanent allowances
         if (permanentAllowances.contains(playerUUID)) {
             fileManager.getDatabase().set("DropStop." + playerUUID + ".permanentAllowances", true);
@@ -103,29 +114,51 @@ public class DropStop implements Listener {
 
     private static Map<UUID, Integer> allowances = new HashMap<>();
     private static Map<UUID, Long> dayAllowances = new HashMap<>();
+    private static Map<UUID, Long> minAllowances = new HashMap<>();
     private static Set<UUID> permanentAllowances = new HashSet<>();
 
     public static void setAllowance(UUID uuid, int count) {
         allowances.put(uuid, count);
     }
 
-    public static void setDayAllowance(UUID uuid, int days) {
+    public void setDayAllowance(UUID uuid, int days) {
         dayAllowances.put(uuid, System.currentTimeMillis() + TimeUnit.DAYS.toMillis(days));
     }
 
-    public static void setPermanentAllowance(UUID uuid) {
+    public void setMinAllowance(UUID uuid, int mins) {
+        minAllowances.put(uuid, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(mins));
+    }
+
+    public void setPermanentAllowance(UUID uuid) {
         permanentAllowances.add(uuid);
     }
 
     public static void enableDropProtection(UUID uuid) {
         allowances.remove(uuid);
         dayAllowances.remove(uuid);
+        minAllowances.remove(uuid);
         permanentAllowances.remove(uuid);
     }
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
+
+        // 检查玩家的背包是否有空位
+        Player player = event.getPlayer();
+        boolean hasEmptySlot = false;
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null) {
+                hasEmptySlot = true;
+                break;
+            }
+        }
+
+        if (!hasEmptySlot) {
+            String message = fileManager.getMessage("DropStop", "inventoryFull");
+            player.sendMessage(message);
+            return;
+        }
 
         if (permanentAllowances.contains(uuid)) return;
 
@@ -137,20 +170,28 @@ public class DropStop implements Listener {
             }
         }
 
+        if (minAllowances.containsKey(uuid)) {
+            if (System.currentTimeMillis() > minAllowances.get(uuid)) {
+                minAllowances.remove(uuid);
+            } else {
+                return;
+            }
+        }
+
         if (allowances.containsKey(uuid)) {
             int count = allowances.get(uuid);
 
-            switch(count) {
+            switch (count) {
                 case 3:
-                    event.getPlayer().sendMessage(fileManager.getMessage("DropStop","remainingDrops")
+                    event.getPlayer().sendMessage(fileManager.getMessage("DropStop", "remainingDrops")
                             .replace("%dropstop_remain%", Integer.toString(3)));
                     break;
                 case 2:
-                    event.getPlayer().sendMessage(fileManager.getMessage("DropStop","remainingDrops")
+                    event.getPlayer().sendMessage(fileManager.getMessage("DropStop", "remainingDrops")
                             .replace("%dropstop_remain%", Integer.toString(2)));
                     break;
                 case 1:
-                    event.getPlayer().sendMessage(fileManager.getMessage("DropStop","remainingDrops")
+                    event.getPlayer().sendMessage(fileManager.getMessage("DropStop", "remainingDrops")
                             .replace("%dropstop_remain%", Integer.toString(1)));
                     break;
             }
@@ -186,6 +227,4 @@ public class DropStop implements Listener {
                 );
         }
     }
-
-
 }

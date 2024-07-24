@@ -1,6 +1,6 @@
-name: RainbowUtilty
+name: RainbowUtility
 main: com.magicpowered.rainbowutility.RainbowUtility
-version: 24.0.2.1
+version: 24.0.2.11
 author: JLING
 api-version: 1.13
 
@@ -45,6 +45,12 @@ permissions:
     default: true
   rainbowutility.worldborder:
     description: 世界边界管理
+    default: op
+  rainbowutility.use.colorname.name:
+    description: 允许玩家使用彩色命名卡
+    default: true
+  rainbowutility.colorname:
+    description: 给予彩色命名卡
     default: op
   rainbowutility.operator:
     description: 管理员任务

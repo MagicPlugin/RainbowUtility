@@ -41,12 +41,13 @@ public class AtHim implements Listener {
         Player sender = event.getPlayer();
         String message = event.getMessage();
 
-        if (!event.getPlayer().hasPermission("rainbowutility.use.athim")) {
-            sender.sendMessage("§7[§6彩虹工具§7] §c您没有使用此功能的权限");
-            return;
-        }
-
         if (message.contains("@")) {
+
+            if (!event.getPlayer().hasPermission("rainbowutility.use.athim")) {
+                sender.sendMessage("§7[§6彩虹工具§7] §c您没有使用此功能的权限");
+                return;
+            }
+
             String[] words = message.split(" ");
             for (String word : words) {
                 if (word.startsWith("@")) {
@@ -54,7 +55,7 @@ public class AtHim implements Listener {
                     Player target = Bukkit.getPlayer(targetName);
                     if (target != null && target.isOnline()) {
                         if (!fileManager.getDatabase().getBoolean("AtHim." + target.getUniqueId(), true)) {
-                            sender.sendMessage(fileManager.getMessage("AtHim", "targetPlayerDeny").replace("%rainbowutility_athim_target%", sender.getName()));
+                            sender.sendMessage(fileManager.getMessage("AtHim", "targetPlayerDeny").replace("%athim_target%", sender.getName()));
                             continue;
                         }
 
@@ -70,18 +71,18 @@ public class AtHim implements Listener {
         switch (useMode) {
             case "chat":
                 target.sendMessage(message.chat.replace("&", "§")
-                                               .replace("%rainbowutility_athim_sender%", sender.getName()));
+                                               .replace("%athim_sender%", sender.getName()));
                 break;
             case "actionbar":
                 target.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message.actionBar.replace("&", "§")
-                                                                                                                      .replace("%rainbowutility_athim_sender%", sender.getName())));
+                                                                                                                      .replace("%athim_sender%", sender.getName())));
                 break;
             case "title":
                 target.sendTitle(
                         message.title.replace("&", "§")
-                                     .replace("%rainbowutility_athim_sender%", sender.getName()),
+                                     .replace("%athim_sender%", sender.getName()),
                         message.subTitle.replace("&", "§")
-                                        .replace("%rainbowutility_athim_sender%", sender.getName()),
+                                        .replace("%athim_sender%", sender.getName()),
                         message.fadeIn,
                         message.stay,
                         message.fadeOut

@@ -9,7 +9,8 @@
 # 心中所想事皆成，一路前行俱坦途。
 # 七彩虹桥横九州，工匠巧手织梦游。
 
-# WorldBorder 模块只提供命令，所以不提供独立开关
+# WorldBorderHandler 模块只提供命令，所以不提供独立开关
+# 欲要开启或关闭一个模块，请修改配置文件后重新启动服务器
 
 # 禁用末影人对于末影螨的仇恨
 AntiEnderMan:
@@ -98,10 +99,10 @@ BackTo:
 CleanScreen:
   # 模块开关
   enable: true
-  # 成功信息
-  successClean: "&7成功清理聊天框"
-  # 延迟清理
-  beToDo: "&7聊天框将在 %cleanscreen_time% 后清理"
+  Message:
+    # 成功信息
+    successClean: "&7成功清理聊天框"
+    # 延迟清理beToDo: "&7聊天框将在 %cleanscreen_time% 后清理"
 
 # 丢弃保护
 # 有关权限
@@ -109,6 +110,11 @@ CleanScreen:
 DropStop:
   # 模块开关
   enable: true
+  # 是否使用自行配置的，会激活丢弃保护的物品材质列表
+  # 启用后，请在 RainbowUtility/DropStop 目录下使用 YAML 文件添加物品
+  # 文件格式请遵循 example.yml 文件示范，您亦可以直接在此文件中添加
+  # 每一次编辑更新后，您都需要使用 /ru reload 使其生效
+  useCustomConfig: true
   Message:
     chat: "丢弃保护"
     actionBar: "丢弃保护"
@@ -125,12 +131,15 @@ DropStop:
   enabled: "&7丢弃保护已强制开启。因此, 次数和天数已归零"
   cancelNext: "&7丢弃保护已在下一次丢弃时关闭"
   cancelDays: "&7丢弃保护已在 %dropstop_days% 天内关闭"
+  cancelMins: "&7丢弃保护已在 %dropstop_mins% 分钟内关闭"
   cancelNums: "&7丢弃保护将在 %dropstop_nums% 次内关闭"
   cancelKeep: "&7丢弃保护将永久被关闭"
+  inventoryFull: "&7由于您的物品栏已满, 丢弃保护在本次丢弃中未生效"
   # 玩家上线时，如果丢弃保护关闭时间已过
   protectionExpired: "&7丢弃保护在今天重新启用"
   # 丢弃保护允许次数即将耗尽
   remainingDrops: "丢弃保护在 %dropstop_remain% 次后重新启用"
+
 
 # 自定义视觉
 # 该功能在 Bukkit+Forge 与 Bukkit+Fabric 混合服务端可能不可用，此问题无法被 MagicPowered 修复
@@ -157,13 +166,45 @@ CustomVision:
     # 重置
     reset: "您的时间回归全局设置"
 
+
+# 彩色命名卡
+# 有关权限
+# rainbowutility.use.colorname.name
+ColorName:
+  enable: true
+  cost: 1
+  Vouchers:
+    material: paper
+    name: 自定义彩色名字代金劵
+    lore:
+      - " "
+      - " 凭本票券，使用 /ru cn {自定义内容} 为您手中的物品编辑名称"
+  Message:
+    success: "您成功地使用彩色命名卡将物品命名"
+    noItem: "请在主手中持有您想要命名的物品"
+    noCard: "您没有彩色命名卡"
+    giveCard: "您收到 %amount% 个新的彩色命名卡"
+
+# 经验
+# 此模块根据玩家具有的权限生效，所以并无默认权限
+Experience:
+  # 开关
+  enable: true
+  # 权限节点
+  # rainbowutility.experience. 为权限识别符，110 为经验倍率。
+  Permissions:
+    - rainbowutility.experience.110
+  Message:
+    message: "本次获取的经验值为原本的 %multiplier%"
+
 # 反馈
 # 有关权限
 #  rainbowutility.use.feedback
 FeedBack:
   # 模块开关
   enable: true
-  successSend: "&7成功向服务器留言反馈"
+  Message:
+    successSend: "&7成功向服务器留言反馈"
 
 # 向管理员请求帮助
 # 有关权限
@@ -171,8 +212,10 @@ FeedBack:
 GetHelp:
   # 模块开关
   enable: true
-  successSend: "&7成功向管理员发起求助"
-  opReply: "§7[§6彩虹工具§7] 管理员 %gethelp_replayop% 回复了您: %gethelp_replymsg%"
+  Message:
+    successSend: "&7成功向管理员发起求助"
+    opReply: "§7[§6彩虹工具§7] 管理员 %gethelp_replayop% 回复了您: %gethelp_replymsg%"
+
 
 # 保护农田不被踩踏破坏
 ProtectFarmland:

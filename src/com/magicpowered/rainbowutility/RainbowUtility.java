@@ -3,6 +3,7 @@ package com.magicpowered.rainbowutility;
 import com.magicpowered.rainbowutility.Utility.*;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.WorldBorder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,6 +24,8 @@ public class RainbowUtility extends JavaPlugin implements Listener {
     private ProtectFarmland protectFarmland;
     private CommandListener commandListener;
     private AntiSandFall antiSandFall;
+    private ColorName colorName;
+    private ExperienceHandler experienceHandler;
 
     private boolean antiEnderManEnable;
     private boolean antiSandFallEnable;
@@ -34,39 +37,64 @@ public class RainbowUtility extends JavaPlugin implements Listener {
     private boolean getHelpEnable;
     private boolean protectFarmlandEnable;
     private boolean feedBackEnable;
+    private boolean colorNameEnable;
+    private boolean experienceHandlerEnable;
 
     @Override
     public void onEnable() {
         try {
             fileManager = new FileManager(this);
+
+            Bukkit.getServer().getLogger().info("[彩虹工具] 开始加载模块");
+
             loadModuleState();
 
-            if (fileManager.getConfig().getBoolean("AntiEnderMan.enable", false)) {
+            if (antiEnderManEnable) {
                 antiEnderMan = new AntiEnderMan(fileManager);
+                Bukkit.getLogger().info("[彩虹工具] AntiEnderMan 被加载");
             }
-            if (fileManager.getConfig().getBoolean("AntiSandFall.enable", false)) {
+            if (antiSandFallEnable) {
                 antiSandFall = new AntiSandFall(fileManager);
+                Bukkit.getLogger().info("[彩虹工具] AntiSandFall 被加载");
             }
-            if (fileManager.getConfig().getBoolean("AtHim.enable", false)) {
+            if (atHimEnable) {
                 atHim = new AtHim(this, fileManager);
+                Bukkit.getLogger().info("[彩虹工具] AtHim 被加载");
             }
-            if (fileManager.getConfig().getBoolean("BackTo.enable", false)) {
+            if (backToEnable) {
                 backTo = new BackTo(this, fileManager);
+                Bukkit.getLogger().info("[彩虹工具] BackTo 被加载");
             }
-            if (fileManager.getConfig().getBoolean("CleanScreen.enable", false)) {
+            if (cleanScreenEnable) {
                 cleanScreen = new CleanScreen(fileManager);
+                Bukkit.getLogger().info("[彩虹工具] CleanScreen 被加载");
             }
-            if (fileManager.getConfig().getBoolean("CustomVision.enable", false)) {
+            if (customVisionEnable) {
                 customVision = new CustomVision(fileManager);
+                Bukkit.getLogger().info("[彩虹工具] CustomVision 被加载");
             }
-            if (fileManager.getConfig().getBoolean("DropStop.enable", false)) {
+            if (dropStopEnable) {
                 dropStop = new DropStop(fileManager);
+                Bukkit.getLogger().info("[彩虹工具] DropStop 被加载");
             }
-            if (fileManager.getConfig().getBoolean("GetHelp.enable", false)) {
+            if (getHelpEnable) {
                 getHelp = new GetHelp(this, fileManager);
+                Bukkit.getLogger().info("[彩虹工具] GetHelp 被加载");
             }
-            if (fileManager.getConfig().getBoolean("ProtectFarmland.enable", false)) {
+            if (protectFarmlandEnable) {
                 protectFarmland = new ProtectFarmland(fileManager);
+                Bukkit.getLogger().info("[彩虹工具] ProtectFarmland 被加载");
+            }
+            if (colorNameEnable) {
+                colorName = new ColorName(this, fileManager);
+                Bukkit.getLogger().info("[彩虹工具] ColorName 被加载");
+            }
+            if (experienceHandlerEnable) {
+                experienceHandler = new ExperienceHandler(fileManager);
+                Bukkit.getLogger().info("[彩虹工具] Experience 被加载");
+            }
+            if (feedBackEnable) {
+                Bukkit.getLogger().info("[彩虹工具] FeedBack 被加载");
             }
 
             commandListener = new CommandListener(this, fileManager);
@@ -91,11 +119,9 @@ public class RainbowUtility extends JavaPlugin implements Listener {
             Bukkit.getServer().getLogger().info(" ");
             Bukkit.getServer().getLogger().info("  '||    ||' '||''|.         '||''|.   '||'  '|'    妙控动力 MagicPowered");
             Bukkit.getServer().getLogger().info("   |||  |||   ||   ||   ||   '||   ||   ||    |     彩虹系列 RainbowSeries");
-            Bukkit.getServer().getLogger().info("   |'|..'||   ||...|'         ||''|'    ||    |     彩虹工具 RainbowUtility v24.0.2.1");
+            Bukkit.getServer().getLogger().info("   |'|..'||   ||...|'         ||''|'    ||    |     彩虹工具 RainbowUtility v24.0.2.11");
             Bukkit.getServer().getLogger().info("   | '|' ||   ||        ||    ||   |.   ||    |     由 JLING 制作");
             Bukkit.getServer().getLogger().info("  .|. | .||. .||.            .||.  '|'   '|..'      https://magicpowered.cn");
-            Bukkit.getServer().getLogger().info(" ");
-            Bukkit.getServer().getLogger().info(ChatColor.YELLOW + "  七彩虹桥横九州，工匠巧手织梦游");
             Bukkit.getServer().getLogger().info(" ");
             if (server.contains("arclight")) {
                 Bukkit.getServer().getLogger().warning("  当前插件在 Arclight 服务端运行，请注意，这是一个混合服务端，一些模块可能不可用");
@@ -104,6 +130,7 @@ public class RainbowUtility extends JavaPlugin implements Listener {
             } else if (server.contains("mohist")) {
                 Bukkit.getServer().getLogger().warning("  当前插件在 Mohist 服务端运行，请注意，这是一个混合服务端，一些模块可能不可用");
             }
+            Bukkit.getServer().getLogger().info(" ");
         } catch (Exception e) {
             Bukkit.getServer().getLogger().info("[彩虹工具] 启动失败!");
             e.printStackTrace();
@@ -122,14 +149,17 @@ public class RainbowUtility extends JavaPlugin implements Listener {
         this.getHelpEnable = cfg.getBoolean("GetHelp.enable");
         this.protectFarmlandEnable = cfg.getBoolean("ProtectFarmland.enable");
         this.feedBackEnable = cfg.getBoolean("FeedBack.enable");
+        this.colorNameEnable = cfg.getBoolean("ColorName.enable");
+        this.experienceHandlerEnable = cfg.getBoolean("Experience.enable");
     }
 
     public void reloadPlugin() {
         fileManager.reloadConfig();
-        antiEnderMan.reloadAntiEnderMan();
-        antiSandFall.reloadAntiSandFall();
-        backTo.reloadBackTo();
-        protectFarmland.reloadProtectFarmland();
+        if (antiEnderManEnable) antiEnderMan.reloadAntiEnderMan();
+        if (antiSandFallEnable) antiSandFall.reloadAntiSandFall();
+        if (backToEnable) backTo.reloadBackTo();
+        if (protectFarmlandEnable) protectFarmland.reloadProtectFarmland();
+        if (dropStopEnable) dropStop.reloadDropStop();
     }
 
     public boolean isAntiEnderManEnabled() {
@@ -172,6 +202,25 @@ public class RainbowUtility extends JavaPlugin implements Listener {
         return feedBackEnable;
     }
 
+    public boolean isColorNameEnable() {
+        return colorNameEnable;
+    }
+
+    public DropStop getDropStop() {
+        return dropStop;
+    }
+
+    public CustomVision getCustomVision() {
+        return customVision;
+    }
+
+    public GetHelp getGetHelp() {
+        return getHelp;
+    }
+
+    public ColorName getColorName() {
+        return colorName;
+    }
 
     @EventHandler
     public void onPluginDisable(PluginDisableEvent event) {
@@ -185,5 +234,4 @@ public class RainbowUtility extends JavaPlugin implements Listener {
         fileManager.saveDatabase();;
         fileManager.saveConfig();
     }
-
 }

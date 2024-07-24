@@ -18,7 +18,7 @@ public class CleanScreen {
     public static void clearScreen(Player player) {
         for (int i = 0; i < 50; i++) { // 发送空白行来“清除”聊天
             player.sendMessage("");
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(fileManager.getMessage("CleanScreen", "successClean")));
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(fileManager.getMessage("CleanScreen.Message", "successClean")));
         }
     }
 
